@@ -2,23 +2,13 @@ var five = require("johnny-five");
 var board = new five.Board();
 
 board.on("ready", function () {
-    var initialValue;
-    var led = new five.Led(11);
-    var input = new five.Sensor("A0");
-    
-    var setLed = function (value) {
-        // sway +/- points to control the LED
-        var sway = 10;
-        var brightness = five.Fn.map(value, initialValue - sway, initialValue + sway, 0, 255);
-        
-        console.log("setting LED to " + brightness);
-        led.brightness(brightness);
+    var wheels = {
+        left: new five.Servo({ pin: 9, type: 'continuous' }),
+        right: new five.Servo({ pin: 10, type: 'continuous' })
     };
-    
-    input.on("data", function () {
-        if (initialValue === undefined) {
-            initialValue = this.value;
-        }
-        setLed(this.value);
-    });
+
+    this.repl.inject({ wheels: wheels });
+
+    wheels.left.center();
+	wheels.right.center();
 });
