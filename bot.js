@@ -3,5 +3,5 @@ var board = new five.Board();
 
 board.on("ready", function () {
     var led = new five.Led(11);
-    led.brightness(100);
+    led.pulse(1000);
 });
