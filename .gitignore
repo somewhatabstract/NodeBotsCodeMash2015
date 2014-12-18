@@ -73,3 +73,10 @@ $RECYCLE.BIN/
 *.msi
 *.msm
 *.msp
+
+
+# Visual Studio
+# =========================
+*.suo
+obj/*
+.ntvs_analysis.dat
