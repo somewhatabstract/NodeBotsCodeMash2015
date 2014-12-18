@@ -80,3 +80,7 @@ $RECYCLE.BIN/
 *.suo
 obj/*
 .ntvs_analysis.dat
+
+# Custom stuff
+# =========================
+.calibration
