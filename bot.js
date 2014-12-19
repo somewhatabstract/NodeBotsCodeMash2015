@@ -1,32 +1,35 @@
 var five = require("johnny-five");
-var fs = require("fs");
 var board = new five.Board();
 
+var stdin = process.stdin;
+stdin.setRawMode(true);
+stdin.resume();
+
 board.on("ready", function () {
-    var stdin = process.stdin;
-    stdin.setRawMode(true);
-    stdin.resume();
-    
     var wheels = {
-        left: new five.Servo({ pin: 10, type: 'continuous' }),
-        right: new five.Servo({ pin: 9, type: 'continuous' }),
+        left: new five.Servo({ pin: 9, type: 'continuous' }),
+        right: new five.Servo({ pin: 10, type: 'continuous' }),
         completeStop: function () {
             wheels.left.center();
             wheels.right.center();
         },
         goForward: function () {
-            wheels.left.cw();
-            wheels.right.ccw();
+            wheels.left.ccw();
+            wheels.right.cw();
+            console.log("goForward");
         },
         turnLeft: function () {
-            wheels.left.center();
-            wheels.right.ccw();
+            wheels.left.cw();
+            wheels.right.cw();
+            console.log("turnLeft");
         },
         turnRight: function () {
-            wheels.left.cw();
-            wheels.right.center();
+            wheels.left.ccw();
+            wheels.right.ccw();
+            console.log("turnRight");
         }
     };
+    wheels.completeStop();
     
     var calibrating = true;
     var eyes = new five.IR.Reflect.Array({
@@ -35,7 +38,7 @@ board.on("ready", function () {
     });
     eyes.enable();
     
-    console.log("Place the bot against the line, perpendicular and hit enter to begin calibration...");
+    console.log("Hit enter to begin calibration...");
     stdin.once("keypress", function () {
         // Start calibration
         // All sensors need to see the extremes so they can understand what a line is,
@@ -47,34 +50,34 @@ board.on("ready", function () {
             stdin.once("keypress", function () {
                 // Stop calibration
                 calibrating = false;
-
-                console.log("Place the bot on the course and press enter to begin line following...");
-                stdin.once("keypress", function () {
-                    // Start watching the line and driving
-                    eyes.on("line", function () {
-                        if (line < 1000) {
-                            wheels.turnRight();
-                        } else if (linear > 4000) {
-                            wheels.turnLeft();
-                        } else {
-                            wheels.goForward();
-                        }
-                    });
-                    
-                    setImmediate(function () {
-                        stdin.once("keypress", function () {
-                            // Stop the bot and quit
-                            eyes.removeAllListeners();
-                            wheels.stop();
-                            // Need to give time for the signals to get to the wheels
-                            setTimeout(function () { process.exit(0); }, 250);
+                
+                setImmediate(function () {
+                    console.log("Place the bot on the course and press enter to begin line following...");
+                    stdin.once("keypress", function () {
+                        // Start watching the line and driving
+                        eyes.on("line", function (err, line) {
+                            if (line < 1500) {
+                                wheels.turnRight();
+                            } else if (line > 3500) {
+                                wheels.turnLeft();
+                            } else {
+                                wheels.goForward();
+                            }
+                            console.log(line);
+                        });
+                        
+                        setImmediate(function () {
+                            stdin.once("keypress", function () {
+                                // Stop the bot and quit
+                                eyes.removeAllListeners();
+                                wheels.completeStop();
+                                // Need to give time for the signals to get to the wheels
+                                setTimeout(function () { process.exit(0); }, 250);
+                            });
                         });
                     });
                 });
             });
         });
     });
-
-    // Include this line to have access to the components at the command line
-    //    this.repl.inject({ wheels: wheels, eyes: eyes });
 });
