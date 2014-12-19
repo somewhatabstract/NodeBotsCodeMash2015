@@ -16,6 +16,7 @@
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
   <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
   <ItemGroup>
+    <Compile Include="array-test.js" />
     <Compile Include="bot.js" />
   </ItemGroup>
   <ItemGroup />
